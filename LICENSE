@@ -1,0 +1,5 @@
+This project incorporates data from SNPedia (http://snpedia.com), which is licensed under the Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported (CC BY-NC-SA 3.0) license.
+
+The data you see in `dna-insights/public/genotypes_by_rsid.json.gz` is derived from SNPedia and inherits this license.
+
+Project code is licensed under MIT (excluding SNPedia-derived content).
