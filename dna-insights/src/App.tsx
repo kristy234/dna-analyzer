@@ -184,6 +184,15 @@ const App: React.FC = () => {
               style={{ marginBottom: '1rem' }}
             />
             <p>Upload your DNA file to see insights about your genetic markers</p>
+
+            <div className="privacy-notice">
+              <h4>Privacy Notice</h4>
+              <p>
+                This tool runs entirely in your web browser. When you upload your genetic data file, it is processed locally on your device — not on a server. The file is never uploaded, stored, or sent anywhere over the internet.
+                We don't collect, store, or share any of your information. In fact, we can't even see your data. Everything stays private and disappears as soon as you close or refresh the page.
+                This site was built to be offline by design: no accounts, no tracking, no hidden uploads — everything needed to run the tool is downloaded and stored locally.
+              </p>
+            </div>
           </div>
         )}
 
