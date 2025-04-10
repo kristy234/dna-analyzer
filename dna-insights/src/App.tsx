@@ -11,16 +11,74 @@ type Match = {
   repute: string;
 };
 
+type ReputeFilter = {
+  good: boolean;
+  bad: boolean;
+  neutral: boolean;
+};
+
 const CARDS_PER_PAGE = 20;
 
 const App: React.FC = () => {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [filteredMatches, setFilteredMatches] = useState<Match[]>([]);
   const [progress, setProgress] = useState(-1);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [fileLoaded, setFileLoaded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(CARDS_PER_PAGE);
   const observerTarget = useRef<HTMLDivElement>(null);
+  
+  // Filter states
+  const [reputeFilter, setReputeFilter] = useState<ReputeFilter>({
+    good: true,
+    bad: true,
+    neutral: true
+  });
+  const [minMagnitude, setMinMagnitude] = useState<number>(0);
+  const [searchText, setSearchText] = useState<string>('');
+  const [maxMagnitude, setMaxMagnitude] = useState<number>(10);
+
+  // Apply filters whenever matches or filter criteria change
+  useEffect(() => {
+    if (matches.length === 0) {
+      setFilteredMatches([]);
+      return;
+    }
+
+    const filtered = matches.filter(match => {
+      // Filter by repute
+      if (!reputeFilter.good && match.repute === 'Good') return false;
+      if (!reputeFilter.bad && match.repute === 'Bad') return false;
+      if (!reputeFilter.neutral && match.repute !== 'Good' && match.repute !== 'Bad') return false;
+      
+      // Filter by magnitude
+      if (match.magnitude < minMagnitude) return false;
+      
+      // Filter by search text
+      if (searchText) {
+        const searchLower = searchText.toLowerCase();
+        return (
+          match.rsid.toLowerCase().includes(searchLower) ||
+          (match.gene && match.gene.toLowerCase().includes(searchLower)) ||
+          match.summary.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      return true;
+    });
+    
+    setFilteredMatches(filtered);
+    setVisibleCount(CARDS_PER_PAGE); // Reset visible count when filters change
+  }, [matches, reputeFilter, minMagnitude, searchText]);
+
+  // Find max magnitude for slider
+  useEffect(() => {
+    if (matches.length > 0) {
+      const max = Math.max(...matches.map(m => m.magnitude));
+      setMaxMagnitude(max);
+    }
+  }, [matches]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,15 +119,15 @@ const App: React.FC = () => {
 
     setIsLoading(true);
     setTimeout(() => {
-      setVisibleCount(prev => Math.min(prev + CARDS_PER_PAGE, matches.length));
+      setVisibleCount(prev => Math.min(prev + CARDS_PER_PAGE, filteredMatches.length));
       setIsLoading(false);
     }, 300);
-  }, [isLoading, matches.length]);
+  }, [isLoading, filteredMatches.length]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       entries => {
-        if (entries[0].isIntersecting && visibleCount < matches.length) {
+        if (entries[0].isIntersecting && visibleCount < filteredMatches.length) {
           loadMore();
         }
       },
@@ -85,9 +143,24 @@ const App: React.FC = () => {
         observer.unobserve(observerTarget.current);
       }
     };
-  }, [loadMore, visibleCount, matches.length]);
+  }, [loadMore, visibleCount, filteredMatches.length]);
 
-  const visibleMatches = matches.slice(0, visibleCount);
+  const visibleMatches = filteredMatches.slice(0, visibleCount);
+
+  const handleReputeChange = (repute: keyof ReputeFilter) => {
+    setReputeFilter(prev => ({
+      ...prev,
+      [repute]: !prev[repute]
+    }));
+  };
+
+  const handleMagnitudeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMinMagnitude(Number(e.target.value));
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(e.target.value);
+  };
 
   return (
     <div className="app-container">
@@ -135,6 +208,69 @@ const App: React.FC = () => {
         )}
 
         {matches.length > 0 && (
+          <div className="filters-section">
+            <h2>Filters</h2>
+            
+            <div className="filter-group">
+              <h3>Repute</h3>
+              <div className="checkbox-group">
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={reputeFilter.good}
+                    onChange={() => handleReputeChange('good')}
+                  />
+                  <span className="checkbox-text good">Good</span>
+                </label>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={reputeFilter.bad}
+                    onChange={() => handleReputeChange('bad')}
+                  />
+                  <span className="checkbox-text bad">Bad</span>
+                </label>
+                <label className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={reputeFilter.neutral}
+                    onChange={() => handleReputeChange('neutral')}
+                  />
+                  <span className="checkbox-text neutral">Neutral</span>
+                </label>
+              </div>
+            </div>
+            
+            <div className="filter-group">
+              <h3>Minimum Magnitude: {minMagnitude}</h3>
+              <input
+                type="range"
+                min="0"
+                max={maxMagnitude}
+                value={minMagnitude}
+                onChange={handleMagnitudeChange}
+                className="magnitude-slider"
+              />
+            </div>
+            
+            <div className="filter-group">
+              <h3>Search</h3>
+              <input
+                type="text"
+                placeholder="Search in rsid, gene, or summary..."
+                value={searchText}
+                onChange={handleSearchChange}
+                className="search-input"
+              />
+            </div>
+            
+            <div className="filter-stats">
+              <p>Showing {filteredMatches.length} of {matches.length} matches</p>
+            </div>
+          </div>
+        )}
+
+        {visibleMatches.length > 0 && (
           <div className="infinite-scroll-container">
             <div className="genotype-grid">
               {visibleMatches.map(({ rsid, gene, summary, magnitude, repute }) => (
@@ -158,15 +294,15 @@ const App: React.FC = () => {
               ))}
             </div>
 
-            {visibleCount < matches.length && (
+            {visibleCount < filteredMatches.length && (
               <div ref={observerTarget} style={{ height: '20px' }}>
                 {isLoading && <div className="load-more-spinner" />}
               </div>
             )}
 
-            {visibleCount >= matches.length && matches.length > 0 && (
+            {visibleCount >= filteredMatches.length && filteredMatches.length > 0 && (
               <div className="alert alert-info" style={{ textAlign: 'center', marginTop: '1rem' }}>
-                Showing all {matches.length.toLocaleString()} matches
+                Showing all {filteredMatches.length.toLocaleString()} matches
               </div>
             )}
           </div>

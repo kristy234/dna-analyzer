@@ -258,10 +258,141 @@ button:focus-visible {
   font-size: 0.9rem;
 }
 
+/* Filter Styles */
+.filters-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  border: 1px solid #e9ecef;
+}
+
+.filters-section h2 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+}
+
+.filter-group {
+  margin-bottom: 1.5rem;
+}
+
+.filter-group h3 {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.checkbox-label input {
+  margin-right: 0.5rem;
+}
+
+.checkbox-text {
+  font-weight: 500;
+}
+
+.checkbox-text.good {
+  color: #28a745;
+}
+
+.checkbox-text.bad {
+  color: #dc3545;
+}
+
+.checkbox-text.neutral {
+  color: #6c757d;
+}
+
+.magnitude-slider {
+  width: 100%;
+  height: 8px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #e9ecef;
+  outline: none;
+  border-radius: 4px;
+}
+
+.magnitude-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #646cff;
+  cursor: pointer;
+}
+
+.magnitude-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #646cff;
+  cursor: pointer;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.search-input:focus {
+  border-color: #646cff;
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(100, 108, 255, 0.25);
+}
+
+.filter-stats {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  font-size: 0.9rem;
+  color: #6c757d;
+}
+
 @media (prefers-color-scheme: dark) {
   .disclaimer {
     background-color: rgba(255, 193, 7, 0.2);
     border-color: rgba(255, 193, 7, 0.3);
     color: #ffc107;
+  }
+  
+  .filters-section {
+    background: #2a2a2a;
+    border-color: #444;
+  }
+  
+  .search-input {
+    background: #333;
+    border-color: #444;
+    color: #f8f9fa;
+  }
+  
+  .search-input:focus {
+    border-color: #646cff;
+    box-shadow: 0 0 0 0.2rem rgba(100, 108, 255, 0.25);
+  }
+  
+  .magnitude-slider {
+    background: #444;
+  }
+  
+  .filter-stats {
+    border-top-color: #444;
   }
 }
